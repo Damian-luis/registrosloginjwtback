@@ -42,7 +42,7 @@ app.get("/info",(req, res)=>{
 })
 
 app.get("/all",(req, res)=>{
-    const query = "SELECT * FROM registroslogin";
+    const query = "SELECT * FROM personas";
     connection.query(query,(error,results)=>{
         if(error){throw error;}
         if (results.length){
@@ -70,15 +70,23 @@ app.post("/add",(req, res)=>{
     })
 
 })
-app.get("/user/:user",(req, res)=>{
+app.get("/user/:user/:password",(req, res)=>{
     const {user,password} = req.params;
-    console.log(user)
+    
     const query=`SELECT * FROM personas WHERE user ='${user}'`
     connection.query(query,(error, results)=>{
         if (error){throw error}
         if (results.length){
-            res.status(200).send(results)
+            //a partir de aqui prueba
+            if(results[0].password===password){
+                res.status(200).send(results)
             console.log("usuario encontrado")
+
+            }
+            else{console.log("usuario o contraseña incorrectos")}
+            
+            //hasta aqui
+            
         }
         else{ res.status(500).send("hubo un error :/")}
     })
