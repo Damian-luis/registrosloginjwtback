@@ -7,7 +7,7 @@ var cors = require('cors')
 
 
 const jwt= require('jsonwebtoken');
-const { applyPatches } = require('immer');
+
 
 
 //middlewares
@@ -97,7 +97,7 @@ app.get("/user/:user/:password",(req, res)=>{
 //Autenticacion con JWT
 
 
-
+/*  DESCOMENTAR
 app.post("/login", (req, res)=>{
     const user = {
         user:req.body.user,
@@ -106,6 +106,40 @@ app.post("/login", (req, res)=>{
     jwt.sign({user:user},"userkey",(err,token)=>{
         res.json({token:token})
     })
+    
+})     */
+app.post("/login/:user/:password", (req, res)=>{
+    
+    const users = {
+        user:req.body.user,
+        password:req.body.password
+    }
+    const user=req.body.user
+    const password=req.body.password
+console.log(password)
+    const query=`SELECT * FROM personas WHERE user ='${user}'`
+    connection.query(query,(error, results)=>{
+        if (error){throw error}
+        if (results.length){
+            //a partir de aqui prueba, le digo que si encuentra el usuario en db, que firme y mande token
+            if(results[0].password===password){
+                console.log("llegaste aqui")
+                jwt.sign({users:users},"userkey",(err,token)=>{
+                    res.json({token:token})
+                })
+            console.log("usuario encontrado")
+
+            }
+            else{console.log("usuario o contraseña incorrectos")}
+            
+            //hasta aqui
+            
+        }
+        //else{ res.status(500).send("hubo un error :/")}
+    })
+
+
+    
     
 })
 
@@ -125,6 +159,20 @@ function verifyToken(req, res, next){
 
 app.post("/login/verify",verifyToken,(req, res)=>{
 //expiresIn no es necesario
+const data={
+    product:req.body.product,
+    price:req.body.price,
+    description:req.body.description
+}
+const query="INSERT INTO compras SET ?"
+connection.query(query,data,(err, data)=>{
+    if(err){throw err;}
+    else{ res.status(200).send("agregado con exito")}
+})
+
+
+
+
     jwt.verify(req.token,"userkey",{expiresIn:"15s"},(error,authData)=>{
         if(error){
             res.sendStatus(403)
